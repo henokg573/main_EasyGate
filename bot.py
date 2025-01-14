@@ -1,18 +1,30 @@
 from flask import Flask, request
 import telebot
+from telegram import Bot, Update
 from telebot import types
-from telegram.ext import CommandHandler, Updater
+from telegram.ext import CommandHandler, Updater, CallbackContext, Application
 import os
+# from telegram.ext import Dispatcher
 from telebot.types import ForceReply
 import telegram
 from telebot import types
 # from keep_alive import keep_alive
 # keep_alive()
-
+from flask import Flask, request
+import telebot
+import logging
+from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
+from telebot.types import InlineKeyboardMarkup
+# from apscheduler.schedulers.background import BackgroundScheduler
+import requests
+import threading
+import time  # Add this line to import the time module
+# from flask import Flask, request
+import requests
 
 
 # Replace with your API key
-API_KEY = '7927894477:AAH5NxBIXmPI7HBwi6os6pr4h7BJphJzlSw'
+API_KEY = '7927894477:AAH0TZjNJWahF1To1oUf-O_YvQVZ3ZSjpyM'
 bot = telebot.TeleBot(API_KEY)
 
 # Admin's chat ID (replace with the actual admin chat ID)
@@ -20,8 +32,56 @@ ADMIN_CHAT_ID = '793034140'  # You should use your actual chat ID here
 
 # bot = telebot.TeleBot(token=os.environ.get("API_KEY"))
 
+# app = Flask(__name__)
+API_URL = f"https://api.telegram.org/bot{API_KEY}"
+
+# Flask app
 app = Flask(__name__)
 
+@app.route('/')
+def home():
+    return "Bot is running."
+
+def get_updates(offset=None):
+    """Fetch updates from Telegram."""
+    params = {"offset": offset, "timeout": 60}
+    response = requests.get(f"{API_URL}/getUpdates", params=params)
+    return response.json()
+
+def send_message(chat_id, text):
+    """Send a message to a chat."""
+    params = {"chat_id": chat_id, "text": text}
+    requests.post(f"{API_URL}/sendMessage", params=params)
+
+# def bot_main():
+#     """Main function to handle bot updates."""
+#     print("Bot is starting...")
+#     offset = None
+#     while True:
+#         try:
+#             updates = get_updates(offset)
+#             if "result" in updates:
+#                 for update in updates["result"]:
+#                     offset = update["update_id"] + 1
+#                     chat_id = update["message"]["chat"]["id"]
+#                     text = update["message"].get("text", "")
+#                     send_message(chat_id, f"You said: {text}")
+#         except Exception as e:
+#             print(f"Error: {e}")
+#             time.sleep(5)  # Avoid crashing on errors
+
+if __name__ == "__main__":
+    # Get the port from the environment variable (default to 8000)
+    port = int(os.environ.get("PORT", 8000))
+    print(f"Running on port: {port}")
+
+    # Run Flask in a separate thread
+    threading.Thread(target=lambda: app.run(host="0.0.0.0", port=port), daemon=True).start()
+
+
+
+
+bot.delete_webhook()
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     print(f"Received /start from {message.chat.id}")  # Debugging
@@ -72,6 +132,9 @@ Feel free to reach out if you have any questions—we’re here to make things e
 
         
     )
+
+
+
    
 
 
@@ -1506,7 +1569,10 @@ def handle_service_selection(message):
 
 
 # Start the bot
-bot.polling(none_stop=True)
+# bot.polling(none_stop=True)
+bot.polling(none_stop=True) # i am using webhook so i commented this
+print(f"Flask app running on port: {port}")
+
 
 
 
